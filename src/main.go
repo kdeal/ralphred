@@ -53,21 +53,34 @@ func stringCommand(args []string) {
 
 	subcmd := args[0]
 	input_string := strings.Join(args[1:], " ")
+	result := ""
 	switch subcmd {
 	case "lower":
-		fmt.Println(strings.ToLower(input_string))
+		result = strings.ToLower(input_string)
 	case "title":
-		fmt.Println(strings.ToTitle(input_string))
+		result = strings.ToTitle(input_string)
 	case "upper":
-		fmt.Println(strings.ToUpper(input_string))
+		result = strings.ToUpper(input_string)
 	case "pymod":
 		no_slashes := strings.Replace(input_string, "/", ".", -1)
-		fmt.Println(strings.TrimSuffix(no_slashes, ".py"))
+		result = strings.TrimSuffix(no_slashes, ".py")
 	case "unpymod":
-		fmt.Println(strings.Replace(input_string, ".", "/", -1) + ".py")
+		result = strings.Replace(input_string, ".", "/", -1) + ".py"
 	default:
-		fmt.Println("Unknown string subcommand")
+		result = "Unknown string subcommand"
 	}
+
+	resp := AlfredResponse {
+		Items: []AlfredItem{
+			alfredItemFromString(result),
+		},
+	}
+	json_data, err := json.Marshal(resp)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error formatting string commands json")
+		return
+	}
+	fmt.Println(string(json_data))
 }
 
 func main() {
