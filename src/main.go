@@ -1,13 +1,53 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"os"
 	"strings"
 )
 
+type AlfredItem struct {
+	Title string `json:"title"`
+	Subtitle string `json:"subtitle,omitempty"`
+	Arg []string `json:"arg"`
+	Autocomplete string `json:"autocomplete"`
+}
+
+func alfredItemFromString(str string) AlfredItem {
+	return AlfredItem{Title: str, Subtitle: "", Arg: []string{str}, Autocomplete: str}
+}
+
+type AlfredResponse struct {
+	Items []AlfredItem `json:"items"`
+}
+
+func stringCommands() {
+	resp := AlfredResponse {
+		Items: []AlfredItem{
+			alfredItemFromString("lower"),
+			alfredItemFromString("title"),
+			alfredItemFromString("upper"),
+			alfredItemFromString("pymod"),
+			alfredItemFromString("unpymod"),
+		},
+	}
+	json_data, err := json.Marshal(resp)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error formatting string commands json")
+		return
+	}
+	fmt.Println(string(json_data))
+}
+
 func stringCommand(args []string) {
-	if len(args) < 2 {
+	if len(args) == 0 {
+		stringCommands()
+		return
+	}
+
+	if len(args) == 1 {
 		return
 	}
 
