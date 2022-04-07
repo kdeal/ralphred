@@ -9,36 +9,68 @@ import (
 )
 
 type AlfredItem struct {
+	UID string `json:"uid,omitempty"`
 	Title string `json:"title"`
 	Subtitle string `json:"subtitle,omitempty"`
 	Arg []string `json:"arg"`
 	Autocomplete string `json:"autocomplete"`
 }
 
-func alfredItemFromString(str string) AlfredItem {
-	return AlfredItem{Title: str, Subtitle: "", Arg: []string{str}, Autocomplete: str}
+func alfredItemFromString(str string, set_uid bool) AlfredItem {
+	uid := ""
+	if set_uid {
+		uid = str
+	}
+
+	return AlfredItem{
+		UID: uid,
+		Title: str,
+		Subtitle: "",
+		Arg: []string{str},
+		Autocomplete: str,
+	}
+}
+
+
+func alfredItemFromStringForwarded(str string, set_uid bool) AlfredItem {
+	uid := ""
+	if set_uid {
+		uid = str
+	}
+
+	return AlfredItem{
+		UID: uid,
+		Title: str,
+		Subtitle: "",
+		Arg: []string{fmt.Sprintf("%s ", str)},
+		Autocomplete: str,
+	}
 }
 
 type AlfredResponse struct {
 	Items []AlfredItem `json:"items"`
 }
 
-func stringCommands() {
-	resp := AlfredResponse {
-		Items: []AlfredItem{
-			alfredItemFromString("lower"),
-			alfredItemFromString("title"),
-			alfredItemFromString("upper"),
-			alfredItemFromString("pymod"),
-			alfredItemFromString("unpymod"),
-		},
-	}
+func (resp AlfredResponse) Print() {
 	json_data, err := json.Marshal(resp)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error formatting string commands json")
 		return
 	}
 	fmt.Println(string(json_data))
+}
+
+func stringCommands() {
+	resp := AlfredResponse {
+		Items: []AlfredItem{
+			alfredItemFromStringForwarded("lower", true),
+			alfredItemFromStringForwarded("title", true),
+			alfredItemFromStringForwarded("upper", true),
+			alfredItemFromStringForwarded("pymod", true),
+			alfredItemFromStringForwarded("unpymod", true),
+		},
+	}
+	resp.Print()
 }
 
 func stringCommand(args []string) {
@@ -72,15 +104,10 @@ func stringCommand(args []string) {
 
 	resp := AlfredResponse {
 		Items: []AlfredItem{
-			alfredItemFromString(result),
+			alfredItemFromString(result, false),
 		},
 	}
-	json_data, err := json.Marshal(resp)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error formatting string commands json")
-		return
-	}
-	fmt.Println(string(json_data))
+	resp.Print()
 }
 
 func main() {
