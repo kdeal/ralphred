@@ -1,6 +1,12 @@
 package ralphred
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
+	"encoding/hex"
+	"hash"
 	"strings"
 )
 
@@ -12,9 +18,19 @@ func stringCommands() {
 			alfredItemFromStringForwarded("upper", true),
 			alfredItemFromStringForwarded("pymod", true),
 			alfredItemFromStringForwarded("unpymod", true),
+			alfredItemFromStringForwarded("md5", true),
+			alfredItemFromStringForwarded("sha1", true),
+			alfredItemFromStringForwarded("sha256", true),
+			alfredItemFromStringForwarded("sha512", true),
 		},
 	}
 	resp.Print()
+}
+
+func hashString(hasher hash.Hash, toHash string) string {
+	hasher.Write([]byte(toHash))
+	hashBytes := hasher.Sum(nil)
+	return hex.EncodeToString(hashBytes)
 }
 
 func stringCommand(args []string) {
@@ -42,6 +58,14 @@ func stringCommand(args []string) {
 		result = strings.TrimSuffix(no_slashes, ".py")
 	case "unpymod":
 		result = strings.Replace(input_string, ".", "/", -1) + ".py"
+	case "md5":
+		result = hashString(md5.New(), input_string)
+	case "sha1":
+		result = hashString(sha1.New(), input_string)
+	case "sha256":
+		result = hashString(sha256.New(), input_string)
+	case "sha512":
+		result = hashString(sha512.New(), input_string)
 	default:
 		result = "Unknown string subcommand"
 	}
