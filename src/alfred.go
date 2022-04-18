@@ -57,3 +57,11 @@ func (resp AlfredResponse) Print() {
 	}
 	fmt.Println(string(json_data))
 }
+
+func errorAlfredResponse(errMsg string) AlfredResponse {
+	return AlfredResponse {
+		Items: []AlfredItem{
+			alfredItemFromString(errMsg, false),
+		},
+	}
+}
