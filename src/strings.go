@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
+	"fmt"
 	"hash"
 	"strings"
 )
@@ -13,6 +14,8 @@ import (
 func stringCommands() {
 	resp := AlfredResponse {
 		Items: []AlfredItem{
+			alfredItemFromStringForwarded("length", true),
+			alfredItemFromStringForwarded("words", true),
 			alfredItemFromStringForwarded("lower", true),
 			alfredItemFromStringForwarded("title", true),
 			alfredItemFromStringForwarded("upper", true),
@@ -47,6 +50,10 @@ func stringCommand(args []string) {
 	input_string := strings.Join(args[1:], " ")
 	result := ""
 	switch subcmd {
+	case "length":
+		result = fmt.Sprintf("%d", len(input_string))
+	case "words":
+		result = fmt.Sprintf("%d", len(strings.Fields(input_string)))
 	case "lower":
 		result = strings.ToLower(input_string)
 	case "title":
