@@ -12,7 +12,7 @@ import (
 )
 
 func stringCommands() {
-	resp := AlfredResponse {
+	resp := AlfredResponse{
 		Items: []AlfredItem{
 			alfredItemFromStringForwarded("length", true),
 			alfredItemFromStringForwarded("words", true),
@@ -77,7 +77,7 @@ func stringCommand(args []string) {
 		result = "Unknown string subcommand"
 	}
 
-	resp := AlfredResponse {
+	resp := AlfredResponse{
 		Items: []AlfredItem{
 			alfredItemFromString(result, false),
 		},

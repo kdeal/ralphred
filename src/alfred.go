@@ -7,11 +7,11 @@ import (
 )
 
 type AlfredItem struct {
-	UID string `json:"uid,omitempty"`
-	Title string `json:"title"`
-	Subtitle string `json:"subtitle,omitempty"`
-	Arg []string `json:"arg"`
-	Autocomplete string `json:"autocomplete"`
+	UID          string   `json:"uid,omitempty"`
+	Title        string   `json:"title"`
+	Subtitle     string   `json:"subtitle,omitempty"`
+	Arg          []string `json:"arg"`
+	Autocomplete string   `json:"autocomplete"`
 }
 
 func alfredItemFromString(str string, set_uid bool) AlfredItem {
@@ -21,14 +21,13 @@ func alfredItemFromString(str string, set_uid bool) AlfredItem {
 	}
 
 	return AlfredItem{
-		UID: uid,
-		Title: str,
-		Subtitle: "",
-		Arg: []string{str},
+		UID:          uid,
+		Title:        str,
+		Subtitle:     "",
+		Arg:          []string{str},
 		Autocomplete: str,
 	}
 }
-
 
 func alfredItemFromStringForwarded(str string, set_uid bool) AlfredItem {
 	uid := ""
@@ -37,10 +36,10 @@ func alfredItemFromStringForwarded(str string, set_uid bool) AlfredItem {
 	}
 
 	return AlfredItem{
-		UID: uid,
-		Title: str,
-		Subtitle: "",
-		Arg: []string{fmt.Sprintf("%s ", str)},
+		UID:          uid,
+		Title:        str,
+		Subtitle:     "",
+		Arg:          []string{fmt.Sprintf("%s ", str)},
 		Autocomplete: str,
 	}
 }
@@ -59,7 +58,7 @@ func (resp AlfredResponse) Print() {
 }
 
 func errorAlfredResponse(errMsg string) AlfredResponse {
-	return AlfredResponse {
+	return AlfredResponse{
 		Items: []AlfredItem{
 			alfredItemFromString(errMsg, false),
 		},

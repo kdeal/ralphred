@@ -47,13 +47,13 @@ func convertCommand(args []string) {
 	}
 
 	resultStr := fmt.Sprintf("%f", result)
-	resp := AlfredResponse {
+	resp := AlfredResponse{
 		Items: []AlfredItem{
 			{
-				UID: "",
-				Title: fmt.Sprintf("%.1f %s", result, to_unit),
-				Subtitle: "",
-				Arg: []string{resultStr},
+				UID:          "",
+				Title:        fmt.Sprintf("%.1f %s", result, to_unit),
+				Subtitle:     "",
+				Arg:          []string{resultStr},
 				Autocomplete: resultStr,
 			},
 		},

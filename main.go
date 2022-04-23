@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-    ralphred "github.com/kdeal/ralphred/src"
+	ralphred "github.com/kdeal/ralphred/src"
 )
 
 func main() {
@@ -11,5 +11,5 @@ func main() {
 	flag.Parse()
 
 	cmdStr := flag.Args()
-    ralphred.Run(*cmdPtr, cmdStr)
+	ralphred.Run(*cmdPtr, cmdStr)
 }
