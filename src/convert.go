@@ -5,6 +5,51 @@ import (
 	"strconv"
 )
 
+type Unit struct {
+	Name     string
+	Symbol   string
+	Type     string
+	ToBase   func(float64) float64
+	FromBase func(float64) float64
+}
+
+var units []Unit = []Unit{
+	// Temperature Units - base is celsius
+	{
+		Name:   "celsius",
+		Symbol: "c",
+		Type:   "temperature",
+		ToBase: func(current float64) float64 {
+			return current
+		},
+		FromBase: func(base float64) float64 {
+			return base
+		},
+	},
+	{
+		Name:   "fahrenheit",
+		Symbol: "f",
+		Type:   "temperature",
+		ToBase: func(current float64) float64 {
+			return (current - 32) * 5 / 9
+		},
+		FromBase: func(base float64) float64 {
+			return (base * 9 / 5) + 32
+		},
+	},
+	{
+		Name:   "Kelvin",
+		Symbol: "k",
+		Type:   "temperature",
+		ToBase: func(current float64) float64 {
+			return current - 273.15
+		},
+		FromBase: func(base float64) float64 {
+			return base + 273.15
+		},
+	},
+}
+
 func convertCommand(args []string) {
 	if len(args) == 0 {
 		errorAlfredResponse("Type measurement with unit to start converting").Print()
@@ -25,7 +70,7 @@ func convertCommand(args []string) {
 		return
 	}
 
-	from_unit := args[1]
+	from_unit_str := args[1]
 
 	if len(args) == 2 {
 		// TODO: Give list of units to convert to
@@ -33,17 +78,42 @@ func convertCommand(args []string) {
 		return
 	}
 
-	to_unit := args[2]
+	to_unit_str := args[2]
+
+	var to_unit Unit
+	var from_unit Unit
+
+	for _, unit := range units {
+		if to_unit_str == unit.Symbol {
+			to_unit = unit
+		}
+		if from_unit_str == unit.Symbol {
+			from_unit = unit
+		}
+	}
 
 	result := 0.0
-	if from_unit == "f" && to_unit == "c" {
-		result = (measurement - 32) * 5 / 9
-	} else if to_unit == "c" && from_unit == "f" {
-		result = (measurement * 9 / 5) + 32
-	} else {
-		errMsg := fmt.Sprintf("Unable to convert from \"%s\" to \"%s\"", to_unit, from_unit)
+	if from_unit.Name == "" && to_unit.Name == "" {
+		errMsg := fmt.Sprintf("The units supplied aren't supported \"%s\" and \"%s\"", to_unit_str, from_unit_str)
 		errorAlfredResponse(errMsg).Print()
 		return
+	} else if from_unit.Name == "" {
+		errMsg := fmt.Sprintf("The unit \"%s\" isn't supported", from_unit_str)
+		errorAlfredResponse(errMsg).Print()
+		return
+	} else if to_unit.Name == "" {
+		errMsg := fmt.Sprintf("The unit \"%s\" isn't supported", to_unit_str)
+		errorAlfredResponse(errMsg).Print()
+		return
+	} else if from_unit.Type != to_unit.Type {
+		errMsg := fmt.Sprintf("Unable to convert \"%s\" to \"%s\"", from_unit_str, to_unit_str)
+		errorAlfredResponse(errMsg).Print()
+		return
+	} else if from_unit.Name == to_unit.Name {
+		result = measurement
+	} else {
+		base_value := from_unit.ToBase(measurement)
+		result = to_unit.FromBase(base_value)
 	}
 
 	resultStr := fmt.Sprintf("%f", result)
@@ -51,7 +121,7 @@ func convertCommand(args []string) {
 		Items: []AlfredItem{
 			{
 				UID:          "",
-				Title:        fmt.Sprintf("%.1f %s", result, to_unit),
+				Title:        fmt.Sprintf("%.1f %s", result, to_unit.Symbol),
 				Subtitle:     "",
 				Arg:          []string{resultStr},
 				Autocomplete: resultStr,
