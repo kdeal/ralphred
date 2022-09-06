@@ -5,6 +5,11 @@ import (
 	"strconv"
 )
 
+const (
+	Temperature = "temperature"
+	Distance    = "distance"
+)
+
 type Unit struct {
 	Name     string
 	Symbol   string
@@ -18,7 +23,7 @@ var units []Unit = []Unit{
 	{
 		Name:   "celsius",
 		Symbol: "c",
-		Type:   "temperature",
+		Type:   Temperature,
 		ToBase: func(current float64) float64 {
 			return current
 		},
@@ -29,7 +34,7 @@ var units []Unit = []Unit{
 	{
 		Name:   "fahrenheit",
 		Symbol: "f",
-		Type:   "temperature",
+		Type:   Temperature,
 		ToBase: func(current float64) float64 {
 			return (current - 32) * 5 / 9
 		},
@@ -40,12 +45,57 @@ var units []Unit = []Unit{
 	{
 		Name:   "Kelvin",
 		Symbol: "k",
-		Type:   "temperature",
+		Type:   Temperature,
 		ToBase: func(current float64) float64 {
 			return current - 273.15
 		},
 		FromBase: func(base float64) float64 {
 			return base + 273.15
+		},
+	},
+	// Distance Units - base is feet
+	{
+		Name:   "feet",
+		Symbol: "ft",
+		Type:   Distance,
+		ToBase: func(current float64) float64 {
+			return current
+		},
+		FromBase: func(base float64) float64 {
+			return base
+		},
+	},
+	{
+		Name:   "yard",
+		Symbol: "yd",
+		Type:   Distance,
+		ToBase: func(current float64) float64 {
+			return current * 3
+		},
+		FromBase: func(base float64) float64 {
+			return base / 3
+		},
+	},
+	{
+		Name:   "mile",
+		Symbol: "mi",
+		Type:   Distance,
+		ToBase: func(current float64) float64 {
+			return current * 5280
+		},
+		FromBase: func(base float64) float64 {
+			return base / 5280
+		},
+	},
+	{
+		Name:   "meter",
+		Symbol: "m",
+		Type:   Distance,
+		ToBase: func(current float64) float64 {
+			return current * 3.280839895
+		},
+		FromBase: func(base float64) float64 {
+			return base / 3.280839895
 		},
 	},
 }
