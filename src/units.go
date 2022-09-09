@@ -5,8 +5,9 @@ import (
 )
 
 const (
-	Temperature = "temperature"
-	Distance    = "distance"
+	Temperature        = "temperature"
+	Distance           = "distance"
+	DigitalInformation = "digital information"
 )
 
 type Unit struct {
@@ -22,7 +23,7 @@ func (u Unit) matchesString(str string) (MatchedUnit, bool) {
 	if u.Prefixes == nil && str == u.Symbol {
 		return MatchedUnit{Unit: u}, true
 	} else if u.Prefixes != nil {
-		for _, prefix := range prefixes {
+		for _, prefix := range u.Prefixes {
 			prefixedSymbol := prefix.Symbol + u.Symbol
 			if str == prefixedSymbol {
 				return MatchedUnit{Unit: u, Prefix: prefix}, true
@@ -66,7 +67,7 @@ type Prefix struct {
 	Base     float64
 }
 
-var prefixes []Prefix = []Prefix{
+var si_prefixes []Prefix = []Prefix{
 	{
 		Name:     "yotta",
 		Symbol:   "Y",
@@ -195,6 +196,123 @@ var prefixes []Prefix = []Prefix{
 	},
 }
 
+var digital_prefixes []Prefix = []Prefix{
+	{
+		Name:     "yotta",
+		Symbol:   "Y",
+		Exponent: 24,
+		Base:     10,
+	},
+	{
+		Name:     "zetta",
+		Symbol:   "Z",
+		Exponent: 21,
+		Base:     10,
+	},
+	{
+		Name:     "exa",
+		Symbol:   "E",
+		Exponent: 18,
+		Base:     10,
+	},
+	{
+		Name:     "peta",
+		Symbol:   "P",
+		Exponent: 15,
+		Base:     10,
+	},
+	{
+		Name:     "tera",
+		Symbol:   "T",
+		Exponent: 12,
+		Base:     10,
+	},
+	{
+		Name:     "giga",
+		Symbol:   "G",
+		Exponent: 9,
+		Base:     10,
+	},
+	{
+		Name:     "mega",
+		Symbol:   "M",
+		Exponent: 6,
+		Base:     10,
+	},
+	{
+		Name:     "kilo",
+		Symbol:   "k",
+		Exponent: 3,
+		Base:     10,
+	},
+	{
+		Name:     "hecto",
+		Symbol:   "h",
+		Exponent: 2,
+		Base:     10,
+	},
+	{
+		Name:     "deca",
+		Symbol:   "da",
+		Exponent: 1,
+		Base:     10,
+	},
+	{
+		Name:     "",
+		Symbol:   "",
+		Exponent: 0,
+		Base:     10,
+	},
+	{
+		Name:     "yobi",
+		Symbol:   "Yi",
+		Exponent: 8,
+		Base:     1024,
+	},
+	{
+		Name:     "zebi",
+		Symbol:   "Zi",
+		Exponent: 7,
+		Base:     1024,
+	},
+	{
+		Name:     "exbi",
+		Symbol:   "Ei",
+		Exponent: 6,
+		Base:     1024,
+	},
+	{
+		Name:     "pebi",
+		Symbol:   "Pi",
+		Exponent: 5,
+		Base:     1024,
+	},
+	{
+		Name:     "tebi",
+		Symbol:   "Ti",
+		Exponent: 4,
+		Base:     1024,
+	},
+	{
+		Name:     "gibi",
+		Symbol:   "Gi",
+		Exponent: 3,
+		Base:     1024,
+	},
+	{
+		Name:     "mebi",
+		Symbol:   "Mi",
+		Exponent: 2,
+		Base:     1024,
+	},
+	{
+		Name:     "Kibi",
+		Symbol:   "Ki",
+		Exponent: 1,
+		Base:     1024,
+	},
+}
+
 var units []Unit = []Unit{
 	// Temperature Units - base is celsius
 	{
@@ -268,12 +386,36 @@ var units []Unit = []Unit{
 		Name:     "meter",
 		Symbol:   "m",
 		Type:     Distance,
-		Prefixes: prefixes,
+		Prefixes: si_prefixes,
 		ToBase: func(current float64) float64 {
 			return current * 3.280839895
 		},
 		FromBase: func(base float64) float64 {
 			return base / 3.280839895
+		},
+	},
+	{
+		Name:     "bit",
+		Symbol:   "b",
+		Type:     DigitalInformation,
+		Prefixes: digital_prefixes,
+		ToBase: func(current float64) float64 {
+			return current
+		},
+		FromBase: func(base float64) float64 {
+			return base
+		},
+	},
+	{
+		Name:     "byte",
+		Symbol:   "B",
+		Type:     DigitalInformation,
+		Prefixes: digital_prefixes,
+		ToBase: func(current float64) float64 {
+			return current * 8
+		},
+		FromBase: func(base float64) float64 {
+			return base / 8
 		},
 	},
 }

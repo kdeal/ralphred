@@ -66,7 +66,7 @@ func convertCommand(args []string) {
 		errMsg := fmt.Sprintf("Unable to convert \"%s\" to \"%s\"", from_unit_str, to_unit_str)
 		errorAlfredResponse(errMsg).Print()
 		return
-	} else if from_unit.Unit.Name == to_unit.Unit.Name {
+	} else if from_unit.Symbol() == to_unit.Symbol() {
 		result = measurement
 	} else {
 		base_value := from_unit.ToBase(measurement)
