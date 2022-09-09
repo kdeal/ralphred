@@ -2,6 +2,7 @@ package ralphred
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 )
 
@@ -14,8 +15,186 @@ type Unit struct {
 	Name     string
 	Symbol   string
 	Type     string
+	Prefixes []Prefix
 	ToBase   func(float64) float64
 	FromBase func(float64) float64
+}
+
+func (u Unit) matchesString(str string) (MatchedUnit, bool) {
+	if u.Prefixes == nil && str == u.Symbol {
+		return MatchedUnit{Unit: u}, true
+	} else if u.Prefixes != nil {
+		for _, prefix := range prefixes {
+			prefixedSymbol := prefix.Symbol + u.Symbol
+			if str == prefixedSymbol {
+				return MatchedUnit{Unit: u, Prefix: prefix}, true
+			}
+		}
+	}
+	return MatchedUnit{}, false
+}
+
+type MatchedUnit struct {
+	Unit   Unit
+	Prefix Prefix
+}
+
+func (u MatchedUnit) Symbol() string {
+	return u.Prefix.Symbol + u.Unit.Symbol
+}
+
+func (u MatchedUnit) Scale() float64 {
+	scale := 1.0
+	if u.Unit.Prefixes != nil {
+		scale = math.Pow(u.Prefix.Base, u.Prefix.Exponent)
+	}
+	return scale
+}
+
+func (u MatchedUnit) ToBase(measurement float64) float64 {
+	scale := u.Scale()
+	return u.Unit.ToBase(measurement * scale)
+}
+
+func (u MatchedUnit) FromBase(measurement float64) float64 {
+	scale := u.Scale()
+	return u.Unit.FromBase(measurement) / scale
+}
+
+type Prefix struct {
+	Name     string
+	Symbol   string
+	Exponent float64
+	Base     float64
+}
+
+var prefixes []Prefix = []Prefix{
+	{
+		Name:     "yotta",
+		Symbol:   "Y",
+		Exponent: 24,
+		Base:     10,
+	},
+	{
+		Name:     "zetta",
+		Symbol:   "Z",
+		Exponent: 21,
+		Base:     10,
+	},
+	{
+		Name:     "exa",
+		Symbol:   "E",
+		Exponent: 18,
+		Base:     10,
+	},
+	{
+		Name:     "peta",
+		Symbol:   "P",
+		Exponent: 15,
+		Base:     10,
+	},
+	{
+		Name:     "tera",
+		Symbol:   "T",
+		Exponent: 12,
+		Base:     10,
+	},
+	{
+		Name:     "giga",
+		Symbol:   "G",
+		Exponent: 9,
+		Base:     10,
+	},
+	{
+		Name:     "mega",
+		Symbol:   "M",
+		Exponent: 6,
+		Base:     10,
+	},
+	{
+		Name:     "kilo",
+		Symbol:   "k",
+		Exponent: 3,
+		Base:     10,
+	},
+	{
+		Name:     "hecto",
+		Symbol:   "h",
+		Exponent: 2,
+		Base:     10,
+	},
+	{
+		Name:     "deca",
+		Symbol:   "da",
+		Exponent: 1,
+		Base:     10,
+	},
+	{
+		Name:     "",
+		Symbol:   "",
+		Exponent: 0,
+		Base:     10,
+	},
+	{
+		Name:     "deci",
+		Symbol:   "d",
+		Exponent: -1,
+		Base:     10,
+	},
+	{
+		Name:     "centi",
+		Symbol:   "c",
+		Exponent: -2,
+		Base:     10,
+	},
+	{
+		Name:     "milli",
+		Symbol:   "m",
+		Exponent: -3,
+		Base:     10,
+	},
+	{
+		Name:     "micro",
+		Symbol:   "mc",
+		Exponent: -6,
+		Base:     10,
+	},
+	{
+		Name:     "nano",
+		Symbol:   "n",
+		Exponent: -9,
+		Base:     10,
+	},
+	{
+		Name:     "pico",
+		Symbol:   "p",
+		Exponent: -12,
+		Base:     10,
+	},
+	{
+		Name:     "femto",
+		Symbol:   "f",
+		Exponent: -15,
+		Base:     10,
+	},
+	{
+		Name:     "atto",
+		Symbol:   "a",
+		Exponent: -18,
+		Base:     10,
+	},
+	{
+		Name:     "zepto",
+		Symbol:   "z",
+		Exponent: -21,
+		Base:     10,
+	},
+	{
+		Name:     "yocto",
+		Symbol:   "y",
+		Exponent: -24,
+		Base:     10,
+	},
 }
 
 var units []Unit = []Unit{
@@ -88,9 +267,10 @@ var units []Unit = []Unit{
 		},
 	},
 	{
-		Name:   "meter",
-		Symbol: "m",
-		Type:   Distance,
+		Name:     "meter",
+		Symbol:   "m",
+		Type:     Distance,
+		Prefixes: prefixes,
 		ToBase: func(current float64) float64 {
 			return current * 3.280839895
 		},
@@ -130,36 +310,38 @@ func convertCommand(args []string) {
 
 	to_unit_str := args[2]
 
-	var to_unit Unit
-	var from_unit Unit
+	var to_unit MatchedUnit
+	var from_unit MatchedUnit
 
 	for _, unit := range units {
-		if to_unit_str == unit.Symbol {
-			to_unit = unit
+		to_matched_unit, to_matched := unit.matchesString(to_unit_str)
+		if to_matched {
+			to_unit = to_matched_unit
 		}
-		if from_unit_str == unit.Symbol {
-			from_unit = unit
+		from_matched_unit, from_matched := unit.matchesString(from_unit_str)
+		if from_matched {
+			from_unit = from_matched_unit
 		}
 	}
 
 	result := 0.0
-	if from_unit.Name == "" && to_unit.Name == "" {
+	if from_unit.Unit.Name == "" && to_unit.Unit.Name == "" {
 		errMsg := fmt.Sprintf("The units supplied aren't supported \"%s\" and \"%s\"", to_unit_str, from_unit_str)
 		errorAlfredResponse(errMsg).Print()
 		return
-	} else if from_unit.Name == "" {
+	} else if from_unit.Unit.Name == "" {
 		errMsg := fmt.Sprintf("The unit \"%s\" isn't supported", from_unit_str)
 		errorAlfredResponse(errMsg).Print()
 		return
-	} else if to_unit.Name == "" {
+	} else if to_unit.Unit.Name == "" {
 		errMsg := fmt.Sprintf("The unit \"%s\" isn't supported", to_unit_str)
 		errorAlfredResponse(errMsg).Print()
 		return
-	} else if from_unit.Type != to_unit.Type {
+	} else if from_unit.Unit.Type != to_unit.Unit.Type {
 		errMsg := fmt.Sprintf("Unable to convert \"%s\" to \"%s\"", from_unit_str, to_unit_str)
 		errorAlfredResponse(errMsg).Print()
 		return
-	} else if from_unit.Name == to_unit.Name {
+	} else if from_unit.Unit.Name == to_unit.Unit.Name {
 		result = measurement
 	} else {
 		base_value := from_unit.ToBase(measurement)
@@ -171,7 +353,7 @@ func convertCommand(args []string) {
 		Items: []AlfredItem{
 			{
 				UID:          "",
-				Title:        fmt.Sprintf("%.1f %s", result, to_unit.Symbol),
+				Title:        fmt.Sprintf("%.1f %s", result, to_unit.Symbol()),
 				Subtitle:     "",
 				Arg:          []string{resultStr},
 				Autocomplete: resultStr,
