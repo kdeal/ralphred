@@ -7,9 +7,9 @@ import (
 
 func main() {
 	cmdPtr := flag.String("command", "commands", "What alfred command is being called")
+	queryPtr := flag.String("query", "query", "Query to send to the command")
 
 	flag.Parse()
 
-	cmdStr := flag.Args()
-	ralphred.Run(*cmdPtr, cmdStr)
+	ralphred.Run(*cmdPtr, *queryPtr)
 }
