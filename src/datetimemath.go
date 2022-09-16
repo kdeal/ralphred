@@ -23,9 +23,9 @@ var input_time_formats []string = []string{
 var output_time_formats []string = []string{
 	time.RFC3339,
 	time.RFC1123,
-	time.RFC822Z,
-	time.RFC850,
-	time.UnixDate,
+	"2006-01-02",
+	"15:04:05",
+	"Jan _2, 2006",
 	time.Kitchen,
 }
 
