@@ -11,23 +11,20 @@ import (
 	"strings"
 )
 
-func stringCommands() {
-	resp := AlfredResponse{
-		Items: []AlfredItem{
-			alfredItemFromStringForwarded("length", true),
-			alfredItemFromStringForwarded("words", true),
-			alfredItemFromStringForwarded("lower", true),
-			alfredItemFromStringForwarded("title", true),
-			alfredItemFromStringForwarded("upper", true),
-			alfredItemFromStringForwarded("pymod", true),
-			alfredItemFromStringForwarded("unpymod", true),
-			alfredItemFromStringForwarded("md5", true),
-			alfredItemFromStringForwarded("sha1", true),
-			alfredItemFromStringForwarded("sha256", true),
-			alfredItemFromStringForwarded("sha512", true),
-		},
+func stringCommands() []AlfredItem {
+	return []AlfredItem{
+		alfredItemFromStringForwarded("length", true),
+		alfredItemFromStringForwarded("words", true),
+		alfredItemFromStringForwarded("lower", true),
+		alfredItemFromStringForwarded("title", true),
+		alfredItemFromStringForwarded("upper", true),
+		alfredItemFromStringForwarded("pymod", true),
+		alfredItemFromStringForwarded("unpymod", true),
+		alfredItemFromStringForwarded("md5", true),
+		alfredItemFromStringForwarded("sha1", true),
+		alfredItemFromStringForwarded("sha256", true),
+		alfredItemFromStringForwarded("sha512", true),
 	}
-	resp.Print()
 }
 
 func hashString(hasher hash.Hash, toHash string) string {
@@ -36,14 +33,13 @@ func hashString(hasher hash.Hash, toHash string) string {
 	return hex.EncodeToString(hashBytes)
 }
 
-func stringCommand(args []string) {
+func stringCommand(args []string) ([]AlfredItem, error) {
 	if len(args) == 0 {
-		stringCommands()
-		return
+		return stringCommands(), nil
 	}
 
 	if len(args) == 1 {
-		return
+		return []AlfredItem{}, nil
 	}
 
 	subcmd := args[0]
@@ -77,10 +73,8 @@ func stringCommand(args []string) {
 		result = "Unknown string subcommand"
 	}
 
-	resp := AlfredResponse{
-		Items: []AlfredItem{
-			alfredItemFromString(result, false),
-		},
+	resp := []AlfredItem{
+		alfredItemFromString(result, false),
 	}
-	resp.Print()
+	return resp, nil
 }

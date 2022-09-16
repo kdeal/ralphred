@@ -1,36 +1,32 @@
 package ralphred
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 )
 
-func convertCommand(args []string) {
+func convertCommand(args []string) ([]AlfredItem, error) {
 	if len(args) == 0 {
-		errorAlfredResponse("Type measurement with unit to start converting").Print()
-		return
+		return []AlfredItem{}, errors.New("Type measurement with unit to start converting")
 	}
 
 	measurement, err := strconv.ParseFloat(args[0], 64)
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Error converting \"%s\" to a number", args[0])
-		errorAlfredResponse(errMsg).Print()
-		return
+		return []AlfredItem{}, fmt.Errorf("Error converting \"%s\" to a number", args[0])
 	}
 
 	if len(args) == 1 {
 		// TODO: List supported units
-		errorAlfredResponse("Please specify a unit for the measurement").Print()
-		return
+		return []AlfredItem{}, errors.New("Please specify a unit for the measurement")
 	}
 
 	from_unit_str := args[1]
 
 	if len(args) == 2 {
 		// TODO: Give list of units to convert to
-		errorAlfredResponse("Please specify a unit to convert to").Print()
-		return
+		return []AlfredItem{}, errors.New("Please specify a unit to convert to")
 	}
 
 	to_unit_str := args[2]
@@ -51,21 +47,13 @@ func convertCommand(args []string) {
 
 	result := 0.0
 	if from_unit.Unit.Name == "" && to_unit.Unit.Name == "" {
-		errMsg := fmt.Sprintf("The units supplied aren't supported \"%s\" and \"%s\"", to_unit_str, from_unit_str)
-		errorAlfredResponse(errMsg).Print()
-		return
+		return []AlfredItem{}, fmt.Errorf("The units supplied aren't supported \"%s\" and \"%s\"", to_unit_str, from_unit_str)
 	} else if from_unit.Unit.Name == "" {
-		errMsg := fmt.Sprintf("The unit \"%s\" isn't supported", from_unit_str)
-		errorAlfredResponse(errMsg).Print()
-		return
+		return []AlfredItem{}, fmt.Errorf("The unit \"%s\" isn't supported", from_unit_str)
 	} else if to_unit.Unit.Name == "" {
-		errMsg := fmt.Sprintf("The unit \"%s\" isn't supported", to_unit_str)
-		errorAlfredResponse(errMsg).Print()
-		return
+		return []AlfredItem{}, fmt.Errorf("The unit \"%s\" isn't supported", to_unit_str)
 	} else if from_unit.Unit.Type != to_unit.Unit.Type {
-		errMsg := fmt.Sprintf("Unable to convert \"%s\" to \"%s\"", from_unit_str, to_unit_str)
-		errorAlfredResponse(errMsg).Print()
-		return
+		return []AlfredItem{}, fmt.Errorf("Unable to convert \"%s\" to \"%s\"", from_unit_str, to_unit_str)
 	} else if from_unit.Symbol() == to_unit.Symbol() {
 		result = measurement
 	} else {
@@ -74,16 +62,14 @@ func convertCommand(args []string) {
 	}
 
 	resultStr := fmt.Sprintf("%f", result)
-	resp := AlfredResponse{
-		Items: []AlfredItem{
-			{
-				UID:          "",
-				Title:        fmt.Sprintf("%.1f %s", result, to_unit.Symbol()),
-				Subtitle:     "",
-				Arg:          []string{resultStr},
-				Autocomplete: resultStr,
-			},
+	resp := []AlfredItem{
+		{
+			UID:          "",
+			Title:        fmt.Sprintf("%.1f %s", result, to_unit.Symbol()),
+			Subtitle:     "",
+			Arg:          []string{resultStr},
+			Autocomplete: resultStr,
 		},
 	}
-	resp.Print()
+	return resp, nil
 }

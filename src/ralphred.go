@@ -25,12 +25,22 @@ func Run(cmd string, query string) {
 	if query != "" {
 	}
 	log.Printf("cmd: %s, args: [%s]\n", cmd, strings.Join(args, ", "))
+
+	var items []AlfredItem
+	var err error
+
 	switch cmd {
 	case "strings":
-		stringCommand(args)
+		items, err = stringCommand(args)
 	case "convert":
-		convertCommand(args)
+		items, err = convertCommand(args)
 	case "datetimemath":
-		dateTimeMathCommand(args)
+		items, err = dateTimeMathCommand(args)
 	}
+
+	if err != nil {
+		items = errorAlfredItems(err.Error())
+	}
+	resp := AlfredResponse{Items: items}
+	resp.Print()
 }

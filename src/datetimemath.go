@@ -1,6 +1,7 @@
 package ralphred
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -67,36 +68,28 @@ func parseDateTime(args []string) (time.Time, bool, []string) {
 	return time.Time{}, true, []string{}
 }
 
-func dateTimeMathCommand(args []string) {
+func dateTimeMathCommand(args []string) ([]AlfredItem, error) {
 	if len(args) == 0 {
-		resp := AlfredResponse{
-			Items: []AlfredItem{
-				alfredItemFromString("Input a time", false),
-			},
+		items := []AlfredItem{
+			alfredItemFromString("Input a time", false),
 		}
-		resp.Print()
-		return
+		return items, nil
 	}
 
 	resulting_time, no_time, remaining_args := parseDateTime(args)
 	log.Printf("Args left after parsing time: [%s]\n", strings.Join(remaining_args, ", "))
 
-	items := []AlfredItem{}
 	if no_time {
-		items = []AlfredItem{
-			alfredItemFromString("Unable to parse a time", false),
-		}
-	} else {
-		// +1 is for unix timestamp
-		items = make([]AlfredItem, len(output_time_formats)+1)
-		for i, format := range output_time_formats {
-			items[i] = alfredItemFromString(resulting_time.Format(format), false)
-		}
-		unix := resulting_time.Unix()
-		items[len(items)-1] = alfredItemFromString(fmt.Sprintf("%d", unix), false)
+		return []AlfredItem{}, errors.New("Unable to parse a time")
 	}
-	resp := AlfredResponse{
-		Items: items,
+
+	// +1 is for unix timestamp
+	items := make([]AlfredItem, len(output_time_formats)+1)
+	for i, format := range output_time_formats {
+		items[i] = alfredItemFromString(resulting_time.Format(format), false)
 	}
-	resp.Print()
+	unix := resulting_time.Unix()
+	items[len(items)-1] = alfredItemFromString(fmt.Sprintf("%d", unix), false)
+
+	return items, nil
 }
