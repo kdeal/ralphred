@@ -30,6 +30,11 @@ var output_time_formats []string = []string{
 }
 
 func parseDateTime(token string) (time.Time, bool) {
+	if token == "now" {
+		return time.Now(), false
+	} else if token == "utc" {
+		return time.Now().UTC(), false
+	}
 	for _, layout := range input_time_formats {
 		time, err := time.Parse(layout, token)
 		if err == nil {
