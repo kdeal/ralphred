@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -29,7 +30,7 @@ var output_time_formats []string = []string{
 	time.Kitchen,
 }
 
-func parseDateTime(token string) (time.Time, bool) {
+func parseDateTimeFromToken(token string) (time.Time, bool) {
 	if token == "now" {
 		return time.Now(), false
 	} else if token == "utc" {
@@ -50,6 +51,22 @@ func parseDateTime(token string) (time.Time, bool) {
 	return time.Time{}, true
 }
 
+func parseDateTime(args []string) (time.Time, bool, []string) {
+	token := ""
+	for n, arg := range args {
+		if token == "" {
+			token = arg
+		} else {
+			token = token + " " + arg
+		}
+		init_time, err := parseDateTimeFromToken(token)
+		if !err {
+			return init_time, false, args[n:]
+		}
+	}
+	return time.Time{}, true, []string{}
+}
+
 func dateTimeMathCommand(args []string) {
 	if len(args) == 0 {
 		resp := AlfredResponse{
@@ -61,23 +78,9 @@ func dateTimeMathCommand(args []string) {
 		return
 	}
 
-	token := ""
-	var resulting_time, no_time = time.Time{}, true
-	for _, arg := range args {
-		if token == "" {
-			token = arg
-		} else {
-			token = token + " " + arg
-		}
-		log.Printf("token: %s\n", token)
-		if no_time {
-			init_time, err := parseDateTime(token)
-			if !err {
-				resulting_time = init_time
-				no_time = false
-			}
-		}
-	}
+	resulting_time, no_time, remaining_args := parseDateTime(args)
+	log.Printf("Args left after parsing time: [%s]\n", strings.Join(remaining_args, ", "))
+
 	items := []AlfredItem{}
 	if no_time {
 		items = []AlfredItem{
