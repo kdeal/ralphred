@@ -62,10 +62,107 @@ func parseDateTime(args []string) (time.Time, bool, []string) {
 		}
 		init_time, err := parseDateTimeFromToken(token)
 		if !err {
-			return init_time, false, args[n:]
+			return init_time, false, args[n+1:]
 		}
 	}
 	return time.Time{}, true, []string{}
+}
+
+type TimeOperation struct {
+	Commands []string
+	Apply    func(time.Time, []string) (time.Time, error)
+}
+
+var identityOperation = TimeOperation{
+	Commands: []string{},
+	Apply: func(init_time time.Time, args []string) (time.Time, error) {
+		// This is just used as the initial operation and should be overwritten
+		// by the first token and never have any arguments
+		if len(args) > 0 {
+			panic("Identity time operation called with arguments")
+		}
+		return init_time, nil
+	},
+}
+
+var operations = []TimeOperation{
+	{
+		Commands: []string{"to", "in"},
+		Apply: func(init_time time.Time, args []string) (time.Time, error) {
+			convert_to := strings.Join(args, " ")
+			switch convert_to {
+			case "":
+				return init_time, errors.New("Timezone required after \"to\"")
+			case "utc":
+				init_time = init_time.UTC()
+			case "local":
+				init_time = init_time.Local()
+			default:
+				// TODO: Do partial timezone matches
+				loc, err := time.LoadLocation(convert_to)
+				if err != nil {
+					return init_time, fmt.Errorf("Unrecognized timezone: %s", convert_to)
+				}
+				init_time = init_time.In(loc)
+			}
+			return init_time, nil
+		},
+	},
+}
+
+func makeOperationsMap() map[string]TimeOperation {
+	operation_map := make(map[string]TimeOperation)
+	for _, operation := range operations {
+		for _, command := range operation.Commands {
+			operation_map[command] = operation
+		}
+	}
+	return operation_map
+}
+
+func adjustTime(init_time time.Time, args []string) (time.Time, error) {
+	if len(args) == 0 {
+		return init_time, nil
+	}
+
+	operation_map := makeOperationsMap()
+
+	// Ensure first token is a valid operation
+	if _, exists := operation_map[args[0]]; !exists {
+		return init_time, errors.New("First word after time definition must be an operation")
+	}
+
+	var err error
+	var operation TimeOperation = identityOperation
+	var operation_args = []string{}
+
+	for {
+		if len(args) == 0 {
+			init_time, err = operation.Apply(init_time, operation_args)
+			break
+		}
+
+		var token string
+		token, args = args[0], args[1:]
+
+		new_operation, exists := operation_map[token]
+		if exists {
+			init_time, err = operation.Apply(init_time, operation_args)
+			if err != nil {
+				break
+			}
+			operation = new_operation
+			operation_args = []string{}
+		} else {
+			operation_args = append(operation_args, token)
+		}
+	}
+
+	if err != nil {
+		return init_time, err
+	}
+
+	return init_time, nil
 }
 
 func dateTimeMathCommand(args []string) ([]AlfredItem, error) {
@@ -77,10 +174,18 @@ func dateTimeMathCommand(args []string) ([]AlfredItem, error) {
 	}
 
 	resulting_time, no_time, remaining_args := parseDateTime(args)
-	log.Printf("Args left after parsing time: [%s]\n", strings.Join(remaining_args, ", "))
-
 	if no_time {
 		return []AlfredItem{}, errors.New("Unable to parse a time")
+	}
+
+	log.Printf("Args left after parsing time: [%s]\n", strings.Join(remaining_args, ", "))
+
+	if len(remaining_args) > 0 {
+		var err error
+		resulting_time, err = adjustTime(resulting_time, remaining_args)
+		if err != nil {
+			return []AlfredItem{}, err
+		}
 	}
 
 	// +1 is for unix timestamp
