@@ -31,6 +31,30 @@ var output_time_formats []string = []string{
 	time.Kitchen,
 }
 
+var daysOfWeek = map[string]time.Weekday{
+	"Sunday":    time.Sunday,
+	"Sun":       time.Sunday,
+	"Monday":    time.Monday,
+	"Mon":       time.Monday,
+	"Tuesday":   time.Tuesday,
+	"Tue":       time.Tuesday,
+	"Wednesday": time.Wednesday,
+	"Wed":       time.Wednesday,
+	"Thursday":  time.Thursday,
+	"Thur":      time.Thursday,
+	"Friday":    time.Friday,
+	"Fri":       time.Friday,
+	"Saturday":  time.Saturday,
+	"Sat":       time.Saturday,
+}
+
+type WeekdayOperation string
+
+const (
+	NextWeekday WeekdayOperation = "next"
+	PrevWeekday WeekdayOperation = "prev"
+)
+
 func parseDateTimeFromToken(token string) (time.Time, bool) {
 	if token == "now" {
 		return time.Now(), false
@@ -66,6 +90,34 @@ func parseDateTime(args []string) (time.Time, bool, []string) {
 		}
 	}
 	return time.Time{}, true, []string{}
+}
+
+func findWeekday(init_time time.Time, args []string, operation WeekdayOperation) (time.Time, error) {
+	if len(args) > 1 {
+		return init_time, fmt.Errorf("%s only accepts 1 argument", operation)
+	} else if len(args) == 0 {
+		return init_time, fmt.Errorf("%s only accepts 1 argument", operation)
+	}
+
+	// TODO: If it prefix matches only one day then accept it
+	weekdayStr := strings.Title(args[0])
+	weekday, ok := daysOfWeek[weekdayStr]
+	if !ok {
+		return init_time, fmt.Errorf("Unrecognized weekday %s", weekdayStr)
+	}
+
+	for {
+		if operation == NextWeekday {
+			init_time = init_time.AddDate(0, 0, 1)
+		} else if operation == PrevWeekday {
+			init_time = init_time.AddDate(0, 0, -1)
+		}
+		if init_time.Weekday() == weekday {
+			break
+		}
+	}
+
+	return init_time, nil
 }
 
 type TimeOperation struct {
@@ -106,6 +158,18 @@ var operations = []TimeOperation{
 				init_time = init_time.In(loc)
 			}
 			return init_time, nil
+		},
+	},
+	{
+		Commands: []string{"next"},
+		Apply: func(init_time time.Time, args []string) (time.Time, error) {
+			return findWeekday(init_time, args, NextWeekday)
+		},
+	},
+	{
+		Commands: []string{"prev"},
+		Apply: func(init_time time.Time, args []string) (time.Time, error) {
+			return findWeekday(init_time, args, PrevWeekday)
 		},
 	},
 }
