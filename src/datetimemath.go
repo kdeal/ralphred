@@ -106,18 +106,13 @@ func findWeekday(init_time time.Time, args []string, operation WeekdayOperation)
 		return init_time, fmt.Errorf("Unrecognized weekday %s", weekdayStr)
 	}
 
-	for {
-		if operation == NextWeekday {
-			init_time = init_time.AddDate(0, 0, 1)
-		} else if operation == PrevWeekday {
-			init_time = init_time.AddDate(0, 0, -1)
-		}
-		if init_time.Weekday() == weekday {
-			break
-		}
+	diff := int(weekday - init_time.Weekday())
+	if diff <= 0 && operation == NextWeekday {
+		diff += 7
+	} else if diff >= 0 && operation == PrevWeekday {
+		diff -= 7
 	}
-
-	return init_time, nil
+	return init_time.AddDate(0, 0, diff), nil
 }
 
 type TimeOperation struct {
