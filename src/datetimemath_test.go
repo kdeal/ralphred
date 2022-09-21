@@ -44,6 +44,18 @@ func TestFindWeekday(t *testing.T) {
 		expected_time, _ := time.Parse(DateLayout, "2022-09-14")
 		assertTime(t, "wednesday", PrevWeekday, expected_time)
 	})
+	t.Run("ThisDiffDayLater", func(t *testing.T) {
+		expected_time, _ := time.Parse(DateLayout, "2022-09-24")
+		assertTime(t, "Saturday", ThisWeekday, expected_time)
+	})
+	t.Run("ThisDiffDayEarlier", func(t *testing.T) {
+		expected_time, _ := time.Parse(DateLayout, "2022-09-19")
+		assertTime(t, "Monday", ThisWeekday, expected_time)
+	})
+	t.Run("ThisSameDay", func(t *testing.T) {
+		expected_time, _ := time.Parse(DateLayout, "2022-09-21")
+		assertTime(t, "wednesday", ThisWeekday, expected_time)
+	})
 	t.Run("InvalidWeekday", func(t *testing.T) {
 		test_time, _ := time.Parse(DateLayout, "2022-09-21")
 		_, err := findWeekday(test_time, []string{"wat"}, NextWeekday)

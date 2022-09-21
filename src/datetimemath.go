@@ -53,6 +53,7 @@ type WeekdayOperation string
 const (
 	NextWeekday WeekdayOperation = "next"
 	PrevWeekday WeekdayOperation = "prev"
+	ThisWeekday WeekdayOperation = "this"
 )
 
 func parseDateTimeFromToken(token string) (time.Time, bool) {
@@ -165,6 +166,12 @@ var operations = []TimeOperation{
 		Commands: []string{"prev"},
 		Apply: func(init_time time.Time, args []string) (time.Time, error) {
 			return findWeekday(init_time, args, PrevWeekday)
+		},
+	},
+	{
+		Commands: []string{"this"},
+		Apply: func(init_time time.Time, args []string) (time.Time, error) {
+			return findWeekday(init_time, args, ThisWeekday)
 		},
 	},
 }
