@@ -10,10 +10,17 @@ const DateLayout string = "2006-01-02"
 func TestFindWeekday(t *testing.T) {
 	assertTime := func(t *testing.T, weekday string, operation WeekdayOperation, expected_time time.Time) {
 		t.Helper()
-		test_time, _ := time.Parse(DateLayout, "2022-09-21")
-		new_time, err := findWeekday(test_time, []string{weekday}, operation)
+		args := []string{"2022-09-21", string(operation), weekday}
+		items, err := dateTimeMathCommand(args)
 		if err != nil {
 			t.Fatalf("Error %s when getting next time", err.Error())
+		}
+		var new_time time.Time
+		for _, item := range items {
+			if item.UID == "RFC3339" {
+				new_time, _ = time.Parse(time.RFC3339, item.Title)
+				break
+			}
 		}
 		if new_time != expected_time {
 			t.Fatalf("Calculated wrong time. %s expected %s", new_time, expected_time)
