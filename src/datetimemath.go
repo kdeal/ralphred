@@ -22,13 +22,13 @@ var input_time_formats []string = []string{
 	time.RFC850,
 }
 
-var output_time_formats []string = []string{
-	time.RFC3339,
-	time.RFC1123,
-	"2006-01-02",
-	"15:04:05",
-	"Jan _2, 2006",
-	time.Kitchen,
+var output_time_formats map[string]string = map[string]string{
+	"RFC3339":        time.RFC3339,
+	"RFC1123":        time.RFC1123,
+	"Date":           "2006-01-02",
+	"KitchenSeconds": "15:04:05",
+	"WrittenDate":    "Jan _2, 2006",
+	"Kitchen":        time.Kitchen,
 }
 
 var daysOfWeek = map[string]time.Weekday{
@@ -256,11 +256,25 @@ func dateTimeMathCommand(args []string) ([]AlfredItem, error) {
 
 	// +1 is for unix timestamp
 	items := make([]AlfredItem, len(output_time_formats)+1)
-	for i, format := range output_time_formats {
-		items[i] = alfredItemFromString(resulting_time.Format(format), false)
+	index := 0
+	for name, format := range output_time_formats {
+		formatted_time := resulting_time.Format(format)
+		items[index] = AlfredItem{
+			UID:          name,
+			Title:        formatted_time,
+			Arg:          []string{formatted_time},
+			Autocomplete: formatted_time,
+		}
+		index += 1
 	}
-	unix := resulting_time.Unix()
-	items[len(items)-1] = alfredItemFromString(fmt.Sprintf("%d", unix), false)
+
+	unix_str := fmt.Sprintf("%d", resulting_time.Unix())
+	items[len(items)-1] = AlfredItem{
+		UID:          "UnixTimeStamp",
+		Title:        unix_str,
+		Arg:          []string{unix_str},
+		Autocomplete: unix_str,
+	}
 
 	return items, nil
 }
