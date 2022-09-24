@@ -11,6 +11,8 @@ func convertCommand(args []string) ([]AlfredItem, error) {
 		return []AlfredItem{}, errors.New("Type measurement with unit to start converting")
 	}
 
+	args = splitUnitFromNumber(args)
+
 	measurement, err := strconv.ParseFloat(args[0], 64)
 
 	if err != nil {
@@ -65,7 +67,7 @@ func convertCommand(args []string) ([]AlfredItem, error) {
 	resp := []AlfredItem{
 		{
 			UID:          "",
-			Title:        fmt.Sprintf("%.1f %s", result, to_unit.Symbol()),
+			Title:        fmt.Sprintf("%.1f%s", result, to_unit.Symbol()),
 			Subtitle:     "",
 			Arg:          []string{resultStr},
 			Autocomplete: resultStr,
