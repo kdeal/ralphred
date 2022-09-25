@@ -30,6 +30,7 @@ var output_time_formats map[string]string = map[string]string{
 	"KitchenSeconds": "15:04:05",
 	"WrittenDate":    "Jan _2, 2006",
 	"Kitchen":        time.Kitchen,
+	"RFC3339Milli":   "2006-01-02T15:04:05.000Z07:00",
 }
 
 var daysOfWeek = map[string]time.Weekday{
@@ -117,6 +118,80 @@ func findWeekday(init_time time.Time, args []string, operation WeekdayOperation)
 	return init_time.AddDate(0, 0, diff), nil
 }
 
+func addDurationToTime(init_time time.Time, durationStr string) time.Time {
+	dur, err := time.ParseDuration(durationStr)
+	if err != nil {
+		log.Panic("Failed to parse formatted duration.")
+	}
+	return init_time.Add(dur)
+}
+
+func prependNewUnit(remaining float64, unit string, args []string) []string {
+	if remaining == 0 {
+		return args
+	}
+	remStr := strconv.FormatFloat(remaining, 'f', -1, 64)
+	return append([]string{remStr, unit}, args...)
+}
+
+func addToTime(init_time time.Time, args []string) (time.Time, error) {
+	args = splitUnitFromNumber(args)
+	for {
+		if len(args) == 0 {
+			return init_time, nil
+		} else if len(args) < 2 {
+			return init_time, fmt.Errorf("Unused argument when parsing add units: %s", args)
+		}
+		var valueStr, unit string
+		valueStr, unit, args = args[0], args[1], args[2:]
+
+		value, err := strconv.ParseFloat(valueStr, 64)
+		if err != nil {
+			return init_time, fmt.Errorf("Expected number, but got %s", valueStr)
+		}
+
+		switch unit {
+		// For second, minute, hour we don't use parseDuration directly since
+		// it only supports the single character unit
+		case "s", "second", "seconds":
+			init_time = addDurationToTime(init_time, valueStr+"s")
+
+		case "m", "minute", "minutes":
+			init_time = addDurationToTime(init_time, valueStr+"m")
+
+		case "h", "hour", "hours":
+			init_time = addDurationToTime(init_time, valueStr+"h")
+
+		case "d", "day", "days":
+			valueInt, valueRem := math.Modf(value)
+			init_time = init_time.AddDate(0, 0, int(valueInt))
+			args = prependNewUnit(24*valueRem, "hour", args)
+
+		case "w", "week", "weeks":
+			args = prependNewUnit(7*value, "day", args)
+
+		case "mn", "month", "months":
+			valueInt, valueRem := math.Modf(value)
+			if valueRem != 0.0 {
+				return init_time, errors.New("Fractional months not supported")
+			}
+			init_time = init_time.AddDate(0, int(valueInt), 0)
+			args = prependNewUnit(30*valueRem, "day", args)
+
+		case "y", "year", "years":
+			valueInt, valueRem := math.Modf(value)
+			init_time = init_time.AddDate(int(valueInt), 0, 0)
+
+			months := 12 * valueRem
+			_, monthsRem := math.Modf(months)
+			if monthsRem != 0.0 {
+				return init_time, errors.New("Fractional years only supported if it results in even months")
+			}
+			args = prependNewUnit(months, "month", args)
+		}
+	}
+}
+
 type TimeOperation struct {
 	Commands []string
 	Apply    func(time.Time, []string) (time.Time, error)
@@ -173,6 +248,12 @@ var operations = []TimeOperation{
 		Commands: []string{"this"},
 		Apply: func(init_time time.Time, args []string) (time.Time, error) {
 			return findWeekday(init_time, args, ThisWeekday)
+		},
+	},
+	{
+		Commands: []string{"+"},
+		Apply: func(init_time time.Time, args []string) (time.Time, error) {
+			return addToTime(init_time, args)
 		},
 	},
 }
