@@ -22,48 +22,48 @@ func TestTempConvert(t *testing.T) {
 		assertResponse(t, []string{"2", "c", "f"}, "35.6f")
 	})
 	t.Run("FToC", func(t *testing.T) {
-		assertResponse(t, []string{"50", "f", "c"}, "10.0c")
+		assertResponse(t, []string{"50", "f", "c"}, "10c")
 	})
 }
 
 func TestTimeConvert(t *testing.T) {
 	t.Run("YearsToSeconds", func(t *testing.T) {
-		assertResponse(t, []string{"10", "yr", "s"}, "315360000.0s")
+		assertResponse(t, []string{"10", "yr", "s"}, "315360000s")
 	})
 	t.Run("SecondsToYears", func(t *testing.T) {
-		assertResponse(t, []string{"63115200", "s", "yr"}, "2.0yr")
+		assertResponse(t, []string{"63072000", "s", "yr"}, "2yr")
 	})
 	t.Run("MonthToSeconds", func(t *testing.T) {
-		assertResponse(t, []string{"2", "mt", "s"}, "5256000.0s")
+		assertResponse(t, []string{"2", "mt", "s"}, "5256000s")
 	})
 	t.Run("SecondsToMonths", func(t *testing.T) {
-		assertResponse(t, []string{"2628000", "s", "mt"}, "1.0mt")
+		assertResponse(t, []string{"2628000", "s", "mt"}, "1mt")
 	})
 	t.Run("DaysToSeconds", func(t *testing.T) {
-		assertResponse(t, []string{"3", "dy", "s"}, "259200.0s")
+		assertResponse(t, []string{"3", "dy", "s"}, "259200s")
 	})
 	t.Run("SecondsToDays", func(t *testing.T) {
-		assertResponse(t, []string{"518400", "s", "dy"}, "6.0dy")
+		assertResponse(t, []string{"518400", "s", "dy"}, "6dy")
 	})
 	t.Run("HoursToSeconds", func(t *testing.T) {
-		assertResponse(t, []string{"7", "hr", "s"}, "25200.0s")
+		assertResponse(t, []string{"7", "hr", "s"}, "25200s")
 	})
 	t.Run("SecondsToHours", func(t *testing.T) {
 		assertResponse(t, []string{"12600", "s", "hr"}, "3.5hr")
 	})
 	t.Run("MinutesToSeconds", func(t *testing.T) {
-		assertResponse(t, []string{"5", "mn", "s"}, "300.0s")
+		assertResponse(t, []string{"5", "mn", "s"}, "300s")
 	})
 	t.Run("SecondsToHours", func(t *testing.T) {
-		assertResponse(t, []string{"540", "s", "mn"}, "9.0mn")
+		assertResponse(t, []string{"540", "s", "mn"}, "9mn")
 	})
 	t.Run("SecondsToMilli", func(t *testing.T) {
-		assertResponse(t, []string{"2.5", "s", "ms"}, "2500.0ms")
+		assertResponse(t, []string{"2.5", "s", "ms"}, "2500ms")
 	})
 	t.Run("SecondsToMicro", func(t *testing.T) {
-		assertResponse(t, []string{"2.5", "s", "mcs"}, "2500000.0mcs")
+		assertResponse(t, []string{"2.5", "s", "mcs"}, "2500000mcs")
 	})
 	t.Run("SecondsToNano", func(t *testing.T) {
-		assertResponse(t, []string{"2.5", "s", "ns"}, "2500000000.0ns")
+		assertResponse(t, []string{"2.5", "s", "ns"}, "2500000000ns")
 	})
 }

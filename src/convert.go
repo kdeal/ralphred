@@ -3,6 +3,7 @@ package ralphred
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 )
 
@@ -63,11 +64,18 @@ func convertCommand(args []string) ([]AlfredItem, error) {
 		result = to_unit.FromBase(base_value)
 	}
 
+	displayStr := fmt.Sprintf("%.1f%s", result, to_unit.Symbol())
 	resultStr := fmt.Sprintf("%f", result)
+
+	if result == math.Trunc(result) {
+		displayStr = fmt.Sprintf("%d%s", int64(result), to_unit.Symbol())
+		resultStr = fmt.Sprintf("%d", int64(result))
+	}
+
 	resp := []AlfredItem{
 		{
 			UID:          "",
-			Title:        fmt.Sprintf("%.1f%s", result, to_unit.Symbol()),
+			Title:        displayStr,
 			Subtitle:     "",
 			Arg:          []string{resultStr},
 			Autocomplete: resultStr,
