@@ -8,6 +8,7 @@ const (
 	Temperature        = "temperature"
 	Distance           = "distance"
 	DigitalInformation = "digital information"
+	Time               = "time"
 )
 
 type Unit struct {
@@ -416,6 +417,99 @@ var units []Unit = []Unit{
 		},
 		FromBase: func(base float64) float64 {
 			return base / 8
+		},
+	},
+	// Time Units - base is seconds
+	{
+		Name:   "year",
+		Symbol: "yr",
+		Type:   Time,
+		ToBase: func(current float64) float64 {
+			return current * (3600 * 24 * 365)
+		},
+		FromBase: func(base float64) float64 {
+			return base / (3600 * 24 * 365)
+		},
+	},
+	{
+		Name:   "month",
+		Symbol: "mt",
+		Type:   Time,
+		ToBase: func(current float64) float64 {
+			return current * ((3600 * 24 * 365) / 12)
+		},
+		FromBase: func(base float64) float64 {
+			return base / ((3600 * 24 * 365) / 12)
+		},
+	},
+	{
+		Name:   "day",
+		Symbol: "dy",
+		Type:   Time,
+		ToBase: func(current float64) float64 {
+			return current * (3600 * 24)
+		},
+		FromBase: func(base float64) float64 {
+			return base / (3600 * 24)
+		},
+	},
+	{
+		Name:   "hour",
+		Symbol: "hr",
+		Type:   Time,
+		ToBase: func(current float64) float64 {
+			return current * 3600
+		},
+		FromBase: func(base float64) float64 {
+			return base / 3600
+		},
+	},
+	{
+		Name:   "minute",
+		Symbol: "mn",
+		Type:   Time,
+		ToBase: func(current float64) float64 {
+			return current * 60
+		},
+		FromBase: func(base float64) float64 {
+			return base / 60
+		},
+	},
+	{
+		Name:   "second",
+		Symbol: "s",
+		Type:   Time,
+		Prefixes: []Prefix{
+			{
+				Name:     "",
+				Symbol:   "",
+				Exponent: 0,
+				Base:     10,
+			},
+			{
+				Name:     "milli",
+				Symbol:   "m",
+				Exponent: -3,
+				Base:     10,
+			},
+			{
+				Name:     "micro",
+				Symbol:   "mc",
+				Exponent: -6,
+				Base:     10,
+			},
+			{
+				Name:     "nano",
+				Symbol:   "n",
+				Exponent: -9,
+				Base:     10,
+			},
+		},
+		ToBase: func(current float64) float64 {
+			return current
+		},
+		FromBase: func(base float64) float64 {
+			return base
 		},
 	},
 }

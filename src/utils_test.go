@@ -30,4 +30,7 @@ func TestSplitNumbersAndText(t *testing.T) {
 	t.Run("NegativeNumber", func(t *testing.T) {
 		assertResult([]string{"-1a"}, []string{"-1", "a"})
 	})
+	t.Run("FloatNumberNoUnit", func(t *testing.T) {
+		assertResult([]string{"1.2", "a"}, []string{"1.2", "a"})
+	})
 }
