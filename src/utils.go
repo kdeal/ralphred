@@ -2,7 +2,7 @@ package ralphred
 
 import "regexp"
 
-var numberWithUnitRegex = regexp.MustCompile("^(?P<number>[0-9.]+)(?P<remaining>[^0-9]+)")
+var numberWithUnitRegex = regexp.MustCompile("^(?P<number>-?[0-9.]+)(?P<remaining>[^0-9]+)")
 
 func splitUnitFromNumber(args []string) []string {
 	new_args := []string{}

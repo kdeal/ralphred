@@ -27,4 +27,7 @@ func TestSplitNumbersAndText(t *testing.T) {
 	t.Run("NumberAfterText", func(t *testing.T) {
 		assertResult([]string{"1a", "b2"}, []string{"1", "a", "b2"})
 	})
+	t.Run("NegativeNumber", func(t *testing.T) {
+		assertResult([]string{"-1a"}, []string{"-1", "a"})
+	})
 }

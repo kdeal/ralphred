@@ -126,15 +126,18 @@ func addDurationToTime(init_time time.Time, durationStr string) time.Time {
 	return init_time.Add(dur)
 }
 
-func prependNewUnit(remaining float64, unit string, args []string) []string {
+func prependNewUnit(remaining float64, unit string, negate bool, args []string) []string {
 	if remaining == 0 {
 		return args
+	}
+	if negate {
+		remaining *= -1
 	}
 	remStr := strconv.FormatFloat(remaining, 'f', -1, 64)
 	return append([]string{remStr, unit}, args...)
 }
 
-func addToTime(init_time time.Time, args []string) (time.Time, error) {
+func addToTime(init_time time.Time, args []string, negate bool) (time.Time, error) {
 	args = splitUnitFromNumber(args)
 	for {
 		if len(args) == 0 {
@@ -148,6 +151,10 @@ func addToTime(init_time time.Time, args []string) (time.Time, error) {
 		value, err := strconv.ParseFloat(valueStr, 64)
 		if err != nil {
 			return init_time, fmt.Errorf("Expected number, but got %s", valueStr)
+		}
+
+		if negate {
+			value *= -1
 		}
 
 		switch unit {
@@ -165,10 +172,10 @@ func addToTime(init_time time.Time, args []string) (time.Time, error) {
 		case "d", "day", "days":
 			valueInt, valueRem := math.Modf(value)
 			init_time = init_time.AddDate(0, 0, int(valueInt))
-			args = prependNewUnit(24*valueRem, "hour", args)
+			args = prependNewUnit(24*valueRem, "hour", negate, args)
 
 		case "w", "week", "weeks":
-			args = prependNewUnit(7*value, "day", args)
+			args = prependNewUnit(7*value, "day", negate, args)
 
 		case "mn", "month", "months":
 			valueInt, valueRem := math.Modf(value)
@@ -176,7 +183,7 @@ func addToTime(init_time time.Time, args []string) (time.Time, error) {
 				return init_time, errors.New("Fractional months not supported")
 			}
 			init_time = init_time.AddDate(0, int(valueInt), 0)
-			args = prependNewUnit(30*valueRem, "day", args)
+			args = prependNewUnit(30*valueRem, "day", negate, args)
 
 		case "y", "year", "years":
 			valueInt, valueRem := math.Modf(value)
@@ -187,7 +194,7 @@ func addToTime(init_time time.Time, args []string) (time.Time, error) {
 			if monthsRem != 0.0 {
 				return init_time, errors.New("Fractional years only supported if it results in even months")
 			}
-			args = prependNewUnit(months, "month", args)
+			args = prependNewUnit(months, "month", negate, args)
 		}
 	}
 }
@@ -253,7 +260,13 @@ var operations = []TimeOperation{
 	{
 		Commands: []string{"+"},
 		Apply: func(init_time time.Time, args []string) (time.Time, error) {
-			return addToTime(init_time, args)
+			return addToTime(init_time, args, false)
+		},
+	},
+	{
+		Commands: []string{"-"},
+		Apply: func(init_time time.Time, args []string) (time.Time, error) {
+			return addToTime(init_time, args, true)
 		},
 	},
 }

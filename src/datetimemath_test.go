@@ -171,3 +171,17 @@ func TestAdd(t *testing.T) {
 		}
 	})
 }
+func TestSub(t *testing.T) {
+	t.Run("SubADay", func(t *testing.T) {
+		test_time, _ := time.Parse(DateLayout, "2022-09-20")
+		assertTime(t, []string{"2022-09-21", "-", "1day"}, test_time)
+	})
+	t.Run("SubANegativeDay", func(t *testing.T) {
+		test_time, _ := time.Parse(DateLayout, "2022-09-22")
+		assertTime(t, []string{"2022-09-21", "-", "-1day"}, test_time)
+	})
+	t.Run("SubARounding", func(t *testing.T) {
+		test_time, _ := time.Parse(DateLayout, "2021-03-21")
+		assertTime(t, []string{"2022-09-21", "-", "1.5year"}, test_time)
+	})
+}
