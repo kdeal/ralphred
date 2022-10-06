@@ -195,8 +195,81 @@ func addToTime(init_time time.Time, args []string, negate bool) (time.Time, erro
 				return init_time, errors.New("Fractional years only supported if it results in even months")
 			}
 			args = prependNewUnit(months, "month", negate, args)
+		default:
+			return init_time, fmt.Errorf("Unsupported unit: %s", unit)
 		}
 	}
+}
+
+func floorTime(init_time time.Time, args []string) (time.Time, error) {
+	if len(args) != 1 {
+		return init_time, fmt.Errorf("floor/start expects 1 argument got: %s", args)
+	}
+	unit := args[0]
+	var new_time time.Time
+	switch unit {
+	case "minute":
+		new_time = time.Date(
+			init_time.Year(),
+			init_time.Month(),
+			init_time.Day(),
+			init_time.Hour(),
+			init_time.Minute(),
+			0,
+			0,
+			init_time.Location(),
+		)
+	case "hour":
+		new_time = time.Date(
+			init_time.Year(),
+			init_time.Month(),
+			init_time.Day(),
+			init_time.Hour(),
+			0,
+			0,
+			0,
+			init_time.Location(),
+		)
+	case "day":
+		new_time = time.Date(
+			init_time.Year(),
+			init_time.Month(),
+			init_time.Day(),
+			0,
+			0,
+			0,
+			0,
+			init_time.Location(),
+		)
+	case "week":
+		day_floor, _ := floorTime(init_time, []string{"day"})
+		new_time, _ = findWeekday(day_floor, []string{"monday"}, ThisWeekday)
+	case "month":
+		new_time = time.Date(
+			init_time.Year(),
+			init_time.Month(),
+			1,
+			0,
+			0,
+			0,
+			0,
+			init_time.Location(),
+		)
+	case "year":
+		new_time = time.Date(
+			init_time.Year(),
+			1,
+			1,
+			0,
+			0,
+			0,
+			0,
+			init_time.Location(),
+		)
+	default:
+		return init_time, fmt.Errorf("Unsupported unit: %s", unit)
+	}
+	return new_time, nil
 }
 
 type TimeOperation struct {
@@ -268,6 +341,10 @@ var operations = []TimeOperation{
 		Apply: func(init_time time.Time, args []string) (time.Time, error) {
 			return addToTime(init_time, args, true)
 		},
+	},
+	{
+		Commands: []string{"floor", "start"},
+		Apply: floorTime,
 	},
 }
 

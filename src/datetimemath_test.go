@@ -171,6 +171,7 @@ func TestAdd(t *testing.T) {
 		}
 	})
 }
+
 func TestSub(t *testing.T) {
 	t.Run("SubADay", func(t *testing.T) {
 		test_time, _ := time.Parse(DateLayout, "2022-09-20")
@@ -183,5 +184,36 @@ func TestSub(t *testing.T) {
 	t.Run("SubARounding", func(t *testing.T) {
 		test_time, _ := time.Parse(DateLayout, "2021-03-21")
 		assertTime(t, []string{"2022-09-21", "-", "1.5year"}, test_time)
+	})
+}
+
+func TestFloor(t *testing.T) {
+	t.Run("FloorToMinute", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-05-05T05:05:00Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "floor", "minute"}, test_time)
+	})
+	t.Run("FloorToHour", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-05-05T05:00:00Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "floor", "hour"}, test_time)
+	})
+	t.Run("FloorToDay", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-05-05T00:00:00Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "floor", "day"}, test_time)
+	})
+	t.Run("FloorToWeek", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-05-02T00:00:00Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "floor", "week"}, test_time)
+	})
+	t.Run("FloorToMonth", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-05-01T00:00:00Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "floor", "month"}, test_time)
+	})
+	t.Run("FloorToYear", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-01-01T00:00:00Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "floor", "year"}, test_time)
+	})
+	t.Run("StartOfMinute", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-05-05T05:05:00Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "start", "minute"}, test_time)
 	})
 }
