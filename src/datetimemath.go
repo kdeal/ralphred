@@ -31,6 +31,7 @@ var output_time_formats map[string]string = map[string]string{
 	"WrittenDate":    "Jan _2, 2006",
 	"Kitchen":        time.Kitchen,
 	"RFC3339Milli":   "2006-01-02T15:04:05.000Z07:00",
+	"RFC3339Nano":   time.RFC3339Nano,
 }
 
 var daysOfWeek = map[string]time.Weekday{
@@ -243,7 +244,7 @@ func floorTime(init_time time.Time, args []string) (time.Time, error) {
 		)
 	case "week":
 		day_floor, _ := floorTime(init_time, []string{"day"})
-		new_time, _ = findWeekday(day_floor, []string{"monday"}, ThisWeekday)
+		new_time, _ = findWeekday(day_floor, []string{"sunday"}, ThisWeekday)
 	case "month":
 		new_time = time.Date(
 			init_time.Year(),
@@ -264,6 +265,84 @@ func floorTime(init_time time.Time, args []string) (time.Time, error) {
 			0,
 			0,
 			0,
+			init_time.Location(),
+		)
+	default:
+		return init_time, fmt.Errorf("Unsupported unit: %s", unit)
+	}
+	return new_time, nil
+}
+
+func daysIn(month time.Month, year int) int {
+	// From: https://www.brandur.org/fragments/go-days-in-month
+	// day = 0 means it goes back one day and since we set the month
+	// to the next one it gives the last day of the month we want
+	return time.Date(year, month + 1, 0, 0, 0, 0, 0, time.UTC).Day()
+}
+
+func ceilTime(init_time time.Time, args []string) (time.Time, error) {
+	if len(args) != 1 {
+		return init_time, fmt.Errorf("ceil/end expects 1 argument got: %s", args)
+	}
+	unit := args[0]
+	var new_time time.Time
+	switch unit {
+	case "minute":
+		new_time = time.Date(
+			init_time.Year(),
+			init_time.Month(),
+			init_time.Day(),
+			init_time.Hour(),
+			init_time.Minute(),
+			59,
+			999999999,
+			init_time.Location(),
+		)
+	case "hour":
+		new_time = time.Date(
+			init_time.Year(),
+			init_time.Month(),
+			init_time.Day(),
+			init_time.Hour(),
+			59,
+			59,
+			999999999,
+			init_time.Location(),
+		)
+	case "day":
+		new_time = time.Date(
+			init_time.Year(),
+			init_time.Month(),
+			init_time.Day(),
+			23,
+			59,
+			59,
+			999999999,
+			init_time.Location(),
+		)
+	case "week":
+		day_floor, _ := ceilTime(init_time, []string{"day"})
+		new_time, _ = findWeekday(day_floor, []string{"saturday"}, ThisWeekday)
+	case "month":
+		new_time = time.Date(
+			init_time.Year(),
+			init_time.Month(),
+			daysIn(init_time.Month(), init_time.Year()),
+			23,
+			59,
+			59,
+			999999999,
+			init_time.Location(),
+		)
+	case "year":
+		new_time = time.Date(
+			init_time.Year(),
+			12,
+			31,
+			23,
+			59,
+			59,
+			999999999,
 			init_time.Location(),
 		)
 	default:
@@ -345,6 +424,10 @@ var operations = []TimeOperation{
 	{
 		Commands: []string{"floor", "start"},
 		Apply: floorTime,
+	},
+	{
+		Commands: []string{"ceil", "end"},
+		Apply: ceilTime,
 	},
 }
 

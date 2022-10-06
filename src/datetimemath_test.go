@@ -15,8 +15,8 @@ func assertTime(t *testing.T, args []string, expected_time time.Time) {
 	}
 	var new_time time.Time
 	for _, item := range items {
-		if item.UID == "RFC3339Milli" {
-			new_time, _ = time.Parse("2006-01-02T15:04:05.000Z07:00", item.Title)
+		if item.UID == "RFC3339Nano" {
+			new_time, _ = time.Parse(time.RFC3339Nano, item.Title)
 			break
 		}
 	}
@@ -201,7 +201,7 @@ func TestFloor(t *testing.T) {
 		assertTime(t, []string{"2022-05-05T05:05:05Z", "floor", "day"}, test_time)
 	})
 	t.Run("FloorToWeek", func(t *testing.T) {
-		test_time, _ := time.Parse(time.RFC3339, "2022-05-02T00:00:00Z")
+		test_time, _ := time.Parse(time.RFC3339, "2022-05-01T00:00:00Z")
 		assertTime(t, []string{"2022-05-05T05:05:05Z", "floor", "week"}, test_time)
 	})
 	t.Run("FloorToMonth", func(t *testing.T) {
@@ -215,5 +215,36 @@ func TestFloor(t *testing.T) {
 	t.Run("StartOfMinute", func(t *testing.T) {
 		test_time, _ := time.Parse(time.RFC3339, "2022-05-05T05:05:00Z")
 		assertTime(t, []string{"2022-05-05T05:05:05Z", "start", "minute"}, test_time)
+	})
+}
+
+func TestCeil(t *testing.T) {
+	t.Run("CeilToMinute", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339Nano, "2022-05-05T05:05:59.999999999Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "ceil", "minute"}, test_time)
+	})
+	t.Run("CeilToHour", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-05-05T05:59:59.999999999Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "ceil", "hour"}, test_time)
+	})
+	t.Run("CeilToDay", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-05-05T23:59:59.999999999Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "ceil", "day"}, test_time)
+	})
+	t.Run("CeilToWeek", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-05-07T23:59:59.999999999Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "ceil", "week"}, test_time)
+	})
+	t.Run("CeilToMonth", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-05-31T23:59:59.999999999Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "ceil", "month"}, test_time)
+	})
+	t.Run("CeilToYear", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-12-31T23:59:59.999999999Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "ceil", "year"}, test_time)
+	})
+	t.Run("EndOfMinute", func(t *testing.T) {
+		test_time, _ := time.Parse(time.RFC3339, "2022-05-05T05:05:59.999999999Z")
+		assertTime(t, []string{"2022-05-05T05:05:05Z", "end", "minute"}, test_time)
 	})
 }
