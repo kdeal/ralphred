@@ -11,20 +11,77 @@ import (
 	"strings"
 )
 
+type StringConversion struct {
+	Convert func(string) string
+}
+
+var string_conversions  = map[string]StringConversion {
+	"length": {
+		Convert: func(input_string string) string {
+			return fmt.Sprintf("%d", len(input_string))
+		},
+	},
+	"words": {
+		Convert: func(input_string string) string {
+			return fmt.Sprintf("%d", len(strings.Fields(input_string)))
+		},
+	},
+	"lower": {
+		Convert: func(input_string string) string {
+			return strings.ToLower(input_string)
+		},
+	},
+	"title": {
+		Convert: func(input_string string) string {
+			return strings.Title(strings.ToLower(input_string))
+		},
+	},
+	"upper": {
+		Convert: func(input_string string) string {
+			return strings.ToUpper(input_string)
+		},
+	},
+	"pymod": {
+		Convert: func(input_string string) string {
+			no_slashes := strings.Replace(input_string, "/", ".", -1)
+			return strings.TrimSuffix(no_slashes, ".py")
+		},
+	},
+	"unpymod": {
+		Convert: func(input_string string) string {
+			return strings.Replace(input_string, ".", "/", -1) + ".py"
+		},
+	},
+	"md5": {
+		Convert: func(input_string string) string {
+			return hashString(md5.New(), input_string)
+		},
+	},
+	"sha1": {
+		Convert: func(input_string string) string {
+			return hashString(sha1.New(), input_string)
+		},
+	},
+	"sha256": {
+		Convert: func(input_string string) string {
+			return hashString(sha256.New(), input_string)
+		},
+	},
+	"sha512": {
+		Convert: func(input_string string) string {
+			return hashString(sha512.New(), input_string)
+		},
+	},
+}
+
 func stringCommands() []AlfredItem {
-	return []AlfredItem{
-		alfredItemFromStringForwarded("length", true),
-		alfredItemFromStringForwarded("words", true),
-		alfredItemFromStringForwarded("lower", true),
-		alfredItemFromStringForwarded("title", true),
-		alfredItemFromStringForwarded("upper", true),
-		alfredItemFromStringForwarded("pymod", true),
-		alfredItemFromStringForwarded("unpymod", true),
-		alfredItemFromStringForwarded("md5", true),
-		alfredItemFromStringForwarded("sha1", true),
-		alfredItemFromStringForwarded("sha256", true),
-		alfredItemFromStringForwarded("sha512", true),
+	helpText := make([]AlfredItem, len(string_conversions))
+	i := 0
+	for command := range string_conversions {
+		helpText[i] = alfredItemFromStringForwarded(command, true)
+		i++
 	}
+	return helpText
 }
 
 func hashString(hasher hash.Hash, toHash string) string {
@@ -44,33 +101,11 @@ func stringCommand(args []string) ([]AlfredItem, error) {
 
 	subcmd := args[0]
 	input_string := strings.Join(args[1:], " ")
-	result := ""
-	switch subcmd {
-	case "length":
-		result = fmt.Sprintf("%d", len(input_string))
-	case "words":
-		result = fmt.Sprintf("%d", len(strings.Fields(input_string)))
-	case "lower":
-		result = strings.ToLower(input_string)
-	case "title":
-		result = strings.Title(strings.ToLower(input_string))
-	case "upper":
-		result = strings.ToUpper(input_string)
-	case "pymod":
-		no_slashes := strings.Replace(input_string, "/", ".", -1)
-		result = strings.TrimSuffix(no_slashes, ".py")
-	case "unpymod":
-		result = strings.Replace(input_string, ".", "/", -1) + ".py"
-	case "md5":
-		result = hashString(md5.New(), input_string)
-	case "sha1":
-		result = hashString(sha1.New(), input_string)
-	case "sha256":
-		result = hashString(sha256.New(), input_string)
-	case "sha512":
-		result = hashString(sha512.New(), input_string)
-	default:
-		result = "Unknown string subcommand"
+	result := "Unknown string subcommand"
+
+	converter, exists := string_conversions[subcmd]
+	if exists {
+		result = converter.Convert(input_string)
 	}
 
 	resp := []AlfredItem{
