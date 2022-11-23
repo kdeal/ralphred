@@ -13,10 +13,10 @@ import (
 
 type StringConversion struct {
 	Description string
-	Convert func(string) string
+	Convert     func(string) string
 }
 
-var string_conversions  = map[string]StringConversion {
+var string_conversions = map[string]StringConversion{
 	"length": {
 		Description: "Return the length of the string",
 		Convert: func(input_string string) string {
@@ -90,11 +90,11 @@ func stringCommands() []AlfredItem {
 	helpText := make([]AlfredItem, len(string_conversions))
 	i := 0
 	for command, converter := range string_conversions {
-		helpText[i] = AlfredItem {
-			UID: command,
-			Title: command,
-			Subtitle: converter.Description,
-			Arg: []string{command + " "},
+		helpText[i] = AlfredItem{
+			UID:          command,
+			Title:        command,
+			Subtitle:     converter.Description,
+			Arg:          []string{command + " "},
 			Autocomplete: command,
 		}
 		i++

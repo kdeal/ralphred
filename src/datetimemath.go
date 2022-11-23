@@ -31,7 +31,7 @@ var output_time_formats map[string]string = map[string]string{
 	"WrittenDate":    "Jan _2, 2006",
 	"Kitchen":        time.Kitchen,
 	"RFC3339Milli":   "2006-01-02T15:04:05.000Z07:00",
-	"RFC3339Nano":   time.RFC3339Nano,
+	"RFC3339Nano":    time.RFC3339Nano,
 }
 
 var daysOfWeek = map[string]time.Weekday{
@@ -277,7 +277,7 @@ func daysIn(month time.Month, year int) int {
 	// From: https://www.brandur.org/fragments/go-days-in-month
 	// day = 0 means it goes back one day and since we set the month
 	// to the next one it gives the last day of the month we want
-	return time.Date(year, month + 1, 0, 0, 0, 0, 0, time.UTC).Day()
+	return time.Date(year, month+1, 0, 0, 0, 0, 0, time.UTC).Day()
 }
 
 func ceilTime(init_time time.Time, args []string) (time.Time, error) {
@@ -423,11 +423,11 @@ var operations = []TimeOperation{
 	},
 	{
 		Commands: []string{"floor", "start"},
-		Apply: floorTime,
+		Apply:    floorTime,
 	},
 	{
 		Commands: []string{"ceil", "end"},
-		Apply: ceilTime,
+		Apply:    ceilTime,
 	},
 }
 
