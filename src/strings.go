@@ -53,7 +53,7 @@ func stringCommand(args []string) ([]AlfredItem, error) {
 	case "lower":
 		result = strings.ToLower(input_string)
 	case "title":
-		result = strings.ToTitle(input_string)
+		result = strings.Title(strings.ToLower(input_string))
 	case "upper":
 		result = strings.ToUpper(input_string)
 	case "pymod":
