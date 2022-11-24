@@ -395,6 +395,7 @@ var units []Unit = []Unit{
 			return base / 3.280839895
 		},
 	},
+	// Digital Units - base is bit
 	{
 		Name:     "bit",
 		Symbol:   "b",
