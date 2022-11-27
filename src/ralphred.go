@@ -36,6 +36,8 @@ func Run(cmd string, query string) {
 		items, err = convertCommand(args)
 	case "datetimemath":
 		items, err = dateTimeMathCommand(args)
+	case "devdocs":
+		items, err = devdocsCommand(args)
 	}
 
 	if err != nil {
