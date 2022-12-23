@@ -1,6 +1,8 @@
 package ralphred
 
 import (
+	"encoding/hex"
+	"hash"
 	"regexp"
 	"strings"
 )
@@ -20,6 +22,12 @@ func splitUnitFromNumber(args []string) []string {
 		}
 	}
 	return new_args
+}
+
+func hashString(hasher hash.Hash, toHash string) string {
+	hasher.Write([]byte(toHash))
+	hashBytes := hasher.Sum(nil)
+	return hex.EncodeToString(hashBytes)
 }
 
 func queryMatches(test_string string, terms []string) bool {

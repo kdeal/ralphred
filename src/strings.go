@@ -5,9 +5,7 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
-	"encoding/hex"
 	"fmt"
-	"hash"
 	"strings"
 )
 
@@ -100,12 +98,6 @@ func stringCommands() []AlfredItem {
 		i++
 	}
 	return helpText
-}
-
-func hashString(hasher hash.Hash, toHash string) string {
-	hasher.Write([]byte(toHash))
-	hashBytes := hasher.Sum(nil)
-	return hex.EncodeToString(hashBytes)
 }
 
 func stringCommand(args []string) ([]AlfredItem, error) {

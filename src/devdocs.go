@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 )
 
 const DevdocsBaseUrl string = "https://devdocs.io/"
+const CACHE_TTL int = 86400
 
 type DevdocsDocSet struct {
 	Name    string `json:"name"`
@@ -37,7 +37,7 @@ type DevDocsDocIndex struct {
 }
 
 func fetchDevdocsDocsList() ([]DevdocsDocSet, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/docs/docs.json", DevdocsBaseUrl))
+	resp, err := cachedRequest(fmt.Sprintf("%s/docs/docs.json", DevdocsBaseUrl), CACHE_TTL)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,8 @@ func fetchDevdocsDocsList() ([]DevdocsDocSet, error) {
 }
 
 func fetchDevdocsDocIndex(docSlug string) (DevDocsDocIndex, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/docs/%s/index.json", DevdocsBaseUrl, docSlug))
+	url := fmt.Sprintf("%s/docs/%s/index.json", DevdocsBaseUrl, docSlug)
+	resp, err := cachedRequest(url, CACHE_TTL)
 	if err != nil {
 		return DevDocsDocIndex{}, err
 	}
