@@ -2,9 +2,9 @@ package ralphred
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 const DevdocsBaseUrl string = "https://devdocs.io/"
@@ -64,26 +64,6 @@ func fetchDevdocsDocIndex(docSlug string) (DevDocsDocIndex, error) {
 	return docIndex, nil
 }
 
-func devdocsListDocs() ([]AlfredItem, error) {
-	docsList, err := fetchDevdocsDocsList()
-	if err != nil {
-		return nil, err
-	}
-
-	docItems := make([]AlfredItem, len(docsList))
-	for i, doc := range docsList {
-		docItems[i] = AlfredItem{
-			UID:          doc.Slug,
-			Title:        fmt.Sprintf("%s %s", doc.Name, doc.Release),
-			Subtitle:     doc.Slug,
-			Arg:          []string{fmt.Sprintf("%s ", doc.Slug)},
-			Autocomplete: doc.Name,
-		}
-	}
-
-	return docItems, nil
-}
-
 func filterEntries(docEntries []DevDocsDocEntry, searchQuery []string) []DevDocsDocEntry {
 	if len(searchQuery) == 0 {
 		return docEntries
@@ -91,14 +71,7 @@ func filterEntries(docEntries []DevDocsDocEntry, searchQuery []string) []DevDocs
 
 	matchedEntries := []DevDocsDocEntry{}
 	for _, entry := range docEntries {
-		match := true
-		for _, term := range searchQuery {
-			if !strings.Contains(entry.Name, term) {
-				match = false
-				break
-			}
-		}
-		if match {
+		if queryMatches(entry.Name, searchQuery) {
 			matchedEntries = append(matchedEntries, entry)
 		}
 	}
@@ -128,8 +101,30 @@ func devdocsSearchDoc(docSlug string, searchQuery []string) ([]AlfredItem, error
 }
 
 func devdocsCommand(args []string) ([]AlfredItem, error) {
+	docsList, err := fetchDevdocsDocsList()
+	if err != nil {
+		return nil, err
+	}
+
+	docItems := make([]AlfredItem, len(docsList))
+	for i, doc := range docsList {
+		docItems[i] = AlfredItem{
+			UID:          doc.Slug,
+			Title:        fmt.Sprintf("%s %s", doc.Name, doc.Release),
+			Subtitle:     doc.Slug,
+			Arg:          []string{fmt.Sprintf("%s ", doc.Slug)},
+			Autocomplete: doc.Name,
+		}
+	}
+
+	docItems = filterAlfredItems(docItems, args)
+
+	return docItems, nil
+}
+
+func devdocsDocSetCommand(args []string) ([]AlfredItem, error) {
 	if len(args) == 0 {
-		return devdocsListDocs()
+		return []AlfredItem{}, errors.New("No doc set specified")
 	}
 
 	searchQuery := []string{}

@@ -38,6 +38,8 @@ func Run(cmd string, query string) {
 		items, err = dateTimeMathCommand(args)
 	case "devdocs":
 		items, err = devdocsCommand(args)
+	case "devdocs_docset":
+		items, err = devdocsDocSetCommand(args)
 	}
 
 	if err != nil {

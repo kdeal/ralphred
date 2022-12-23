@@ -1,6 +1,9 @@
 package ralphred
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 var numberWithUnitRegex = regexp.MustCompile("^(?P<number>-?[0-9.]+)(?P<remaining>[^0-9.]+)")
 
@@ -17,4 +20,13 @@ func splitUnitFromNumber(args []string) []string {
 		}
 	}
 	return new_args
+}
+
+func queryMatches(test_string string, terms []string) bool {
+	for _, term := range terms {
+		if !strings.Contains(test_string, term) {
+			return false
+		}
+	}
+	return true
 }

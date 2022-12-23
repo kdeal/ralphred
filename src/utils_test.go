@@ -34,3 +34,34 @@ func TestSplitNumbersAndText(t *testing.T) {
 		assertResult([]string{"1.2", "a"}, []string{"1.2", "a"})
 	})
 }
+
+func TestQueryMatches(t *testing.T) {
+	assertMatch := func(str string, terms []string, matches bool) {
+		result := queryMatches(str, terms)
+		if result != matches {
+			if matches {
+				t.Fatal("Query didn't match when it should")
+			} else {
+				t.Fatalf("Query matched when it shouldn't")
+			}
+		}
+	}
+	t.Run("EmptyString", func(t *testing.T) {
+		assertMatch("", []string{"test"}, false)
+	})
+	t.Run("NoSearchString", func(t *testing.T) {
+		assertMatch("test", []string{}, true)
+	})
+	t.Run("OneSearchStringMatches", func(t *testing.T) {
+		assertMatch("test", []string{"te"}, true)
+	})
+	t.Run("OneSearchStringNoMatch", func(t *testing.T) {
+		assertMatch("test", []string{"oue"}, false)
+	})
+	t.Run("MultiSearchStringNoMatch", func(t *testing.T) {
+		assertMatch("test", []string{"te", "st"}, true)
+	})
+	t.Run("MultiSearchStringOneMatch", func(t *testing.T) {
+		assertMatch("test", []string{"te", "oue"}, false)
+	})
+}

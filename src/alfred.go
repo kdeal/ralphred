@@ -62,3 +62,16 @@ func errorAlfredItems(errMsg string) []AlfredItem {
 		alfredItemFromString(errMsg, false),
 	}
 }
+
+// Filter alfred items by the search query. This shouldn't be used when there
+// are a large amount of items
+func filterAlfredItems(items []AlfredItem, searchQuery []string) []AlfredItem {
+	matchedItems := []AlfredItem{}
+	for _, item := range items {
+		if queryMatches(item.Title, searchQuery) {
+			matchedItems = append(matchedItems, item)
+		}
+	}
+
+	return matchedItems
+}
